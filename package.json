@@ -8,9 +8,11 @@
   "license": "Apache 2.0",
   "private": true,
   "dependencies": {
+    "clipboard": "^2.0.6",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1",
-    "pwa-helpers": "^0.9.1"
+    "pwa-helpers": "^0.9.1",
+    "three": "0.71.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
