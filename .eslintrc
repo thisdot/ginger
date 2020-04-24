@@ -20,5 +20,10 @@
   "plugins": [
     "prettier"
   ],
-  "settings": {}
+  "settings": {},
+  "globals": {
+    // FIXME: Remove THREE from the globals list when we upgrade to a version
+    // that supports modules.
+    "THREE": "readonly"
+  }
 }

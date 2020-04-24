@@ -44,6 +44,9 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
     })
     .join('\n');
 
+  // FIXME: Temporary cdn url to three.js should be replaced. This exists since
+  // we're migrating from an old version that doesn't support modules yet.
+
   const indexHtml = `
     <!DOCTYPE html>
     <html ${makeHtmlAttributes(attributes.html)}>
@@ -58,6 +61,7 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
         </style>
         ${links}
         ${scripts}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/71/three.min.js"></script>
       </head>
       <body>
         <ginger-app></ginger-app>
