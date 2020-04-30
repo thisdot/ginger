@@ -1,6 +1,7 @@
 import babel from 'rollup-plugin-babel';
 import cleanup from 'rollup-plugin-cleanup';
 import commonjs from '@rollup/plugin-commonjs';
+import copy from 'rollup-plugin-copy';
 import html from '@rollup/plugin-html';
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
@@ -56,7 +57,13 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
         <title>${title}</title>
         <style>
           html, body {
+            width: 100%;
+            height: 100%;
             margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: black;
+            font-family: Arial;
           }
         </style>
         ${links}
@@ -106,6 +113,9 @@ export default {
         script: { type: 'module' },
       },
       template: indexHtmlTemplate,
+    }),
+    copy({
+      targets: [{ src: 'static', dest: 'dist' }],
     }),
   ],
 };

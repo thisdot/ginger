@@ -5,32 +5,32 @@ export const gingerDataMixin = (base) =>
 
       this.textures = {
         gingercolor: {
-          path: 'model/ginger_color.jpg',
+          path: 'static/model/ginger_color.jpg',
           texture: null,
         },
         gingercolornormal: {
-          path: 'model/ginger_norm.jpg',
+          path: 'static/model/ginger_norm.jpg',
           texture: null,
         },
       };
 
       this.meshes = {
         gingerhead: {
-          path: 'model/gingerhead.json',
+          path: 'static/model/gingerhead.json',
           texture: this.textures.gingercolor,
           normalmap: this.textures.gingercolornormal,
           morphTargets: true,
           mesh: null,
         },
         gingerheadband: {
-          path: 'model/gingerheadband.json',
+          path: 'static/model/gingerheadband.json',
           texture: this.textures.gingercolor,
           normalmap: null,
           morphTargets: false,
           mesh: null,
         },
         gingerheadphones: {
-          path: 'model/gingerheadphones.json',
+          path: 'static/model/gingerheadphones.json',
           texture: null,
           normalmap: null,
           color: new THREE.Color('rgb(180, 180, 180)'),
@@ -38,7 +38,7 @@ export const gingerDataMixin = (base) =>
           mesh: null,
         },
         gingerlefteye: {
-          path: 'model/gingerlefteye.json',
+          path: 'static/model/gingerlefteye.json',
           texture: this.textures.gingercolor,
           normalmap: null,
           morphTargets: false,
@@ -47,7 +47,7 @@ export const gingerDataMixin = (base) =>
           mesh: null,
         },
         gingerrighteye: {
-          path: 'model/gingerrighteye.json',
+          path: 'static/model/gingerrighteye.json',
           texture: this.textures.gingercolor,
           normalmap: null,
           morphTargets: false,
@@ -56,21 +56,21 @@ export const gingerDataMixin = (base) =>
           mesh: null,
         },
         gingerteethbot: {
-          path: 'model/gingerteethbot.json',
+          path: 'static/model/gingerteethbot.json',
           texture: this.textures.gingercolor,
           normalmap: null,
           morphTargets: true,
           mesh: null,
         },
         gingerteethtop: {
-          path: 'model/gingerteethtop.json',
+          path: 'static/model/gingerteethtop.json',
           texture: this.textures.gingercolor,
           normalmap: null,
           morphTargets: true,
           mesh: null,
         },
         gingertongue: {
-          path: 'model/gingertongue.json',
+          path: 'static/model/gingertongue.json',
           texture: this.textures.gingercolor,
           normalmap: null,
           morphTargets: true,
