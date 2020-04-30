@@ -15,15 +15,6 @@ class GingerCanvas extends gingerDataMixin(LitElement) {
     return {};
   }
 
-  /**
-   * Instance of the element is created/upgraded. Use: initializing state,
-   * set up event listeners, create shadow dom.
-   * @constructor
-   */
-  constructor() {
-    super();
-  }
-
   static get styles() {
     const styles = css`
       #sv-lab-header {
@@ -311,6 +302,15 @@ class GingerCanvas extends gingerDataMixin(LitElement) {
   }
 
   /**
+   * Instance of the element is created/upgraded. Use: initializing state,
+   * set up event listeners, create shadow dom.
+   * @constructor
+   */
+  constructor() {
+    super();
+  }
+
+  /**
    * Implement to describe the element's DOM using lit-html.
    * Use the element current props to return a lit-html template result
    * to render into the element.
@@ -437,7 +437,7 @@ class GingerCanvas extends gingerDataMixin(LitElement) {
    * @param {*} changedProperties
    */
   updated(changedProperties) {
-    if (this.shadowRoot.getElementById('ginger')) return;
+    if (this.shadowRoot.querySelector('#renderer>canvas')) return;
 
     this.initGinger();
   }
