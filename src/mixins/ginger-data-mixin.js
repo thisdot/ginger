@@ -1,7 +1,13 @@
+import * as THREE from 'three';
+
 export const gingerDataMixin = (base) =>
   class extends base {
     constructor() {
       super();
+
+      this.ginger = new THREE.Object3D();
+      this.leftEye = new THREE.Object3D();
+      this.rightEye = new THREE.Object3D();
 
       this.textures = {
         gingercolor: {
@@ -13,7 +19,6 @@ export const gingerDataMixin = (base) =>
           texture: null,
         },
       };
-
       this.meshes = {
         gingerhead: {
           path: 'static/model/gingerhead.json',
@@ -77,7 +82,6 @@ export const gingerDataMixin = (base) =>
           mesh: null,
         },
       };
-
       this.morphs = {
         eyes: {
           value: 0,
@@ -234,8 +238,193 @@ export const gingerDataMixin = (base) =>
           },
         },
       };
+      this.controls = {
+        eyes: {
+          control: 'eyes',
+          min: -1,
+          max: 1,
+          morph: this.morphs.eyes,
+        },
+        expression: {
+          control: 'expression',
+          min: -1,
+          max: 1,
+          morph: this.morphs.expression,
+        },
+        jawrange: {
+          control: 'jawrange',
+          min: 0,
+          max: 1,
+          morph: this.morphs.jawrange,
+        },
+        jawtwist: {
+          control: 'jawtwist',
+          min: -1,
+          max: 1,
+          morph: this.morphs.jawtwist,
+        },
+        symmetry: {
+          control: 'symmetry',
+          min: 0,
+          max: 1,
+          morph: this.morphs.symmetry,
+        },
+        lipcurl: {
+          control: 'lipcurl',
+          min: -1,
+          max: 1,
+          morph: this.morphs.lipcurl,
+        },
+        lipsync: {
+          control: 'lipsync',
+          min: -1,
+          max: 1,
+          morph: this.morphs.lipsync,
+        },
+        sex: {
+          control: 'sex',
+          min: 0,
+          max: 1,
+          morph: this.morphs.sex,
+        },
+        width: {
+          control: 'width',
+          min: -1,
+          max: 1,
+          morph: this.morphs.width,
+        },
+        tongue: {
+          control: 'tongue',
+          min: 0,
+          max: 1,
+          morph: this.morphs.tongue,
+        },
+      };
     }
 
+    /**
+     * Loads in all required assets from the network.
+     */
+    async loadAssets() {
+      const texturesPromise = this.loadTextures();
+      const meshesPromise = this.loadMeshes();
+
+      await meshesPromise;
+
+      // Add loaded meshes into the scene and apply initial transformations. We
+      // do the copies during the next animation frame so THREE doesn't
+      // overwrite them during initialization.
+      for (let mesh in this.meshes) {
+        if (this.meshes[mesh].position !== undefined) {
+          const args = {
+            mesh: this.meshes[mesh],
+          };
+          this.queueNextFrame((args) => {
+            args.mesh.mesh.position.copy(args.mesh.position);
+          }, args);
+        }
+
+        if (this.meshes[mesh].parent !== undefined) {
+          this.meshes[mesh].parent.add(this.meshes[mesh].mesh);
+        } else {
+          this.ginger.add(this.meshes[mesh].mesh);
+        }
+      }
+
+      await Promise.all(texturesPromise, meshesPromise);
+    }
+
+    /**
+     * Loads a texture over the network.
+     * @param {THREE.TextureLoader} textureLoader
+     * @param {String} path
+     * @param {String} mesh
+     */
+    async loadTexture(textureLoader, path, texture) {
+      const loadedTexture = await new Promise((resolve, reject) => {
+        textureLoader.load(path, (loadedTexture) => {
+          resolve(loadedTexture);
+        });
+      }).catch((err) => {
+        throw err;
+      });
+      this.textures[texture].texture = loadedTexture;
+    }
+
+    /**
+     * Loads in all required textures over the network.
+     */
+    async loadTextures() {
+      const textureLoader = new THREE.TextureLoader();
+      const promises = [];
+
+      for (let texture in this.textures) {
+        const path = this.textures[texture].path;
+        promises.push(this.loadTexture(textureLoader, path, texture));
+      }
+
+      return Promise.all(promises);
+    }
+
+    /**
+     * Loads a mesh over the network and creates the THREE objects for it.
+     * @param {THREE.JSONLoader} jsonLoader
+     * @param {String} path
+     * @param {String} mesh
+     */
+    async loadMesh(jsonLoader, path, mesh) {
+      const geometry = await new Promise((resolve, reject) => {
+        jsonLoader.load(path, (geometry) => {
+          resolve(geometry);
+        });
+      }).catch((err) => {
+        throw err;
+      });
+
+      let texture, normalmap, color;
+      if (this.meshes[mesh].texture !== null) {
+        texture = this.meshes[mesh].texture.texture;
+      }
+      if (this.meshes[mesh].normalmap !== null) {
+        normalmap = this.meshes[mesh].normalmap.texture;
+      }
+      if (this.meshes[mesh].color !== null) {
+        color = this.meshes[mesh].color;
+      }
+
+      const material = new THREE.MeshLambertMaterial({
+        map: texture,
+        color: color,
+        normalmap: normalmap,
+        vertexColors: THREE.FaceColors,
+        shading: THREE.SmoothShading,
+        morphTargets: this.meshes[mesh].morphTargets,
+      });
+      this.meshes[mesh].mesh = new THREE.Mesh(geometry, material);
+    }
+
+    /**
+     * Loads in all required meshes over the network.
+     */
+    async loadMeshes() {
+      const jsonLoader = new THREE.jsonLoader();
+      const promises = [];
+
+      for (let mesh in this.meshes) {
+        const path = this.meshes[mesh].path;
+        promises.push(this.loadMesh(jsonLoader, path, mesh));
+      }
+
+      return Promise.all(promises);
+    }
+
+    /**
+     * Linear easing function.
+     * @param {*} t current time
+     * @param {*} b start value
+     * @param {*} c change in value
+     * @param {*} d duration
+     */
     linear(t, b, c, d) {
       return (c * t) / d + b;
     }

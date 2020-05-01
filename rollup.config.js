@@ -68,7 +68,6 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
         </style>
         ${links}
         ${scripts}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/71/three.min.js"></script>
       </head>
       <body>
         <ginger-app></ginger-app>
@@ -97,6 +96,9 @@ export default {
     babel({
       extensions: ['.js'],
       presets: [],
+      // Three.js is ignored as babel takes millennia to process it, probably
+      // being caused by a bug.
+      ignore: ['node_modules/three'],
       env: {
         production: {
           presets: ['@babel/preset-env', 'minify'],

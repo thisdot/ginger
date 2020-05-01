@@ -2,28 +2,18 @@
   "parser": "babel-eslint",
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "es6": true
   },
   "rules": {
     "strict": 0,
     "no-console": "warn",
-    "quotes": [
-      "warn",
-      "single"
-    ],
+    "quotes": ["warn", "single"],
     "prettier/prettier": "warn",
     "no-unused-vars": "warn"
   },
-  "extends": [
-    "eslint:recommended"
-  ],
-  "plugins": [
-    "prettier"
-  ],
+  "extends": ["eslint:recommended"],
+  "plugins": ["prettier"],
   "settings": {},
-  "globals": {
-    // FIXME: Remove THREE from the globals list when we upgrade to a version
-    // that supports modules.
-    "THREE": "readonly"
-  }
+  "globals": {}
 }
