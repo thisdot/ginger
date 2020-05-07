@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 
+/**
+ * A mixin that contains helper functions to load 3D assets and weights and
+ * other metadata for the Ginger morph targets.
+ * @param {*} base
+ */
 export const gingerDataMixin = (base) =>
   class extends base {
     constructor() {
@@ -407,7 +412,7 @@ export const gingerDataMixin = (base) =>
      * Loads in all required meshes over the network.
      */
     async loadMeshes() {
-      const jsonLoader = new THREE.jsonLoader();
+      const jsonLoader = new THREE.LegacyJSONLoader();
       const promises = [];
 
       for (let mesh in this.meshes) {

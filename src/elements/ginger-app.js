@@ -20,8 +20,8 @@ class GingerApp extends gingerDataMixin(LitElement) {
 
       // Three.js scene objects.
       scene: { type: Object },
-      camera: { type: Object },
-      renderer: { type: Object },
+      camera: { type: THREE.PerspectiveCamera },
+      renderer: { type: THREE.WebGLRenderer },
       ginger: { type: Object },
       leftEye: { type: Object },
       rightEye: { type: Object },
@@ -30,10 +30,10 @@ class GingerApp extends gingerDataMixin(LitElement) {
       queue: { type: Array },
       aspect: { type: Number },
       isMouseTracking: { type: Boolean },
-      isCountingDown: { type: Boolean },
       leftEyeOrigin: { type: Object },
       rightEyeOrigin: { type: Object },
       selected: { type: String },
+      screenshotCounter: { type: Number },
     };
   }
 
@@ -330,6 +330,12 @@ class GingerApp extends gingerDataMixin(LitElement) {
    */
   constructor() {
     super();
+
+    this.queue = [];
+    this.aspect = 0;
+    this.isMouseTracking = false;
+    this.selected = 'eyes';
+    this.screenshotCounter = 0;
   }
 
   /**
@@ -373,11 +379,17 @@ class GingerApp extends gingerDataMixin(LitElement) {
               max="1"
               step="0.01"
               value="0"
+              @change="${this.handleRangeSlide}"
+              @input="${this.handleRangeSlide}"
             />
           </section>
           <section>
             <label for="morph">Morph Target</label>
-            <select id="morph" class="select">
+            <select
+              id="morph"
+              class="select"
+              @change="${this.handleMorphSelect}"
+            >
               <option value="eyes">Eyes</option>
               <option value="expression">Expression</option>
               <option value="jawrange">Jaw Height</option>
@@ -392,12 +404,27 @@ class GingerApp extends gingerDataMixin(LitElement) {
           </section>
         </div>
         <div class="flex-container">
-          <div><button id="share" type="button">Share Pose</button></div>
           <div>
-            <button id="screenshot" type="button">Take Screenshot</button>
+            <button id="share" type="button" @click="${this.handleShare}">
+              Share Pose
+            </button>
           </div>
           <div>
-            <button id="mousetrack" type="button" class="buttoncolor-OFF">
+            <button
+              id="screenshot"
+              type="button"
+              @click="${this.handleScreenshot}"
+            >
+              Take Screenshot
+            </button>
+          </div>
+          <div>
+            <button
+              id="mousetrack"
+              type="button"
+              class="buttoncolor-OFF"
+              @click="${this.handleMouseTrack}"
+            >
               Follow OFF
             </button>
           </div>
@@ -447,6 +474,171 @@ class GingerApp extends gingerDataMixin(LitElement) {
   }
 
   /**
+   * Called when the slider is moved and updates the selected morph target.
+   * @param {Event} event
+   */
+  handleRangeSlide(event) {
+    const progress = event.target.valueAsNumber;
+    this.updateMorph(progress);
+    this.morph();
+  }
+
+  /**
+   * Changes the selected morph target.
+   * @param {Event} event
+   */
+  handleMorphSelect(event) {
+    const value = event.target.value;
+    this.select(value);
+  }
+
+  /**
+   * Displays the share modal.
+   * @param {Event} event
+   */
+  handleShare(event) {
+    const modal = this.shadowRoot.getElementById('share-modal');
+    modal.classList.remove('hidden');
+
+    const shareLink = this.shadowRoot.getElementById('share-link');
+    shareLink.value = this.generateShareLink();
+  }
+
+  /**
+   * Takes a screenshot after finishing a countdown.
+   * @param {Event} event
+   */
+  handleScreenshot(event) {
+    const seconds = 5;
+    this.countdownScreenshot(seconds);
+  }
+
+  /**
+   * Toggles Ginger's mouse tracking. If enabled her head follows the cursor.
+   * @param {Event} event
+   */
+  handleMouseTrack(event) {
+    this.isMouseTracking = !this.isMouseTracking;
+
+    const elButton = this.shadowRoot.getElementById('mousetrack');
+    const state = this.isMouseTracking ? 'ON' : 'OFF';
+    elButton.textContent = `Follow ${state}`;
+    elButton.className = `buttoncolor-${state}`;
+  }
+
+  /**
+   * Points Ginger's head at the cursor whenever the mouse moves.
+   * @param {Event} event
+   */
+  handleMouseMove(event) {
+    // Mock a touch event so we don't need to handle both mouse and touch events
+    // inside the look at function.
+    const data = {
+      touches: [{ clientX: event.clientX, clientY: event.clientY }],
+      type: 'mousemove',
+    };
+    this.lookAtCursor(data);
+  }
+
+  /**
+   * Points Ginger's head at the cursor whenever the touch point moves.
+   * @param {Event} event
+   */
+  handleTouchMove(event) {
+    this.lookAtCursor(event);
+  }
+
+  /**
+   * Called when the window is resized.
+   * @param {Event} event
+   */
+  handleWindowResize(event) {
+    this.recalculateAspect();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  /**
+   * Shows the screenshot counter modal and takes a screenshot after finishing
+   * a countdown.
+   * @param {number} seconds
+   */
+  async countdownScreenshot(seconds) {
+    const counter = this.shadowRoot.getElementById('counter');
+    counter.classList.remove('hidden');
+
+    while (seconds > 0) {
+      this.screenshotCounter = seconds;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      seconds -= 1;
+    }
+    this.takeScreenshot();
+
+    counter.classList.add('hidden');
+  }
+
+  /**
+   * Show the screenshot modal, take a screenshot, and display it in the modal.
+   */
+  takeScreenshot() {
+    const modal = this.shadowRoot.getElementById('screenshot-modal');
+    modal.classList.remove('hidden');
+
+    const image = this.shadowRoot.getElementById('screenshot-image');
+    image.src = this.renderer.domElement.toDataURL('image/jpeg', 0.8);
+  }
+
+  /**
+   * Points ginger's head at the cursor.
+   * @param {Event} event
+   */
+  lookAtCursor(event) {
+    if (event.type == 'touchmove') {
+      event.preventDefault();
+    }
+
+    if (this.isMouseTracking) {
+      const mouse = new THREE.Vector3(
+        (event.touches[0].clientX / window.innerWidth) * 2 - 1,
+        -(event.touches[0].clientY / window.innerHeight) * 2 + 1,
+        0.5
+      );
+      mouse.unproject(this.camera);
+
+      // When getting the direction, flip the x and y axis or the eyes will
+      // look the wrong direction.
+      let direction = mouse.sub(this.camera.position).normalize();
+      direction.x *= -1;
+      direction.y *= -1;
+
+      const distance = this.camera.position.z / direction.z;
+      const position = this.camera.position
+        .clone()
+        .add(direction.multiplyScalar(distance));
+
+      // Track the cursor with the eyes with no adjustments.
+      this.leftEye.lookAt(position);
+      this.rightEye.lookAt(position);
+
+      // Track the cursor with the head, but dampened. If we don't dampen the
+      // head tracking then she will always try to face the cursor head on.
+      this.ginger.lookAt(position);
+      this.ginger.rotation.x /= 5;
+      this.ginger.rotation.y /= 5;
+      this.ginger.rotation.z = 0;
+    }
+  }
+
+  /**
+   * Calculates a new aspect using the size of the window and generate a new
+   * projection matrix for the main perspective camera.
+   */
+  recalculateAspect() {
+    this.aspect = window.innerWidth / window.innerHeight;
+    this.camera.aspect = this.aspect;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
    * Adds a callback to the action queue that will be executed right before the
    * next frame is rendered.
    * @param {Function} callback
@@ -463,9 +655,9 @@ class GingerApp extends gingerDataMixin(LitElement) {
    * The "game" loop where actions are executed and the renderer is invoked.
    */
   animate() {
-    requestAnimationFrame(this.animate);
+    requestAnimationFrame(this.animate.bind(this));
 
-    var i = this.queue.length;
+    let i = this.queue.length;
     while (i--) {
       const args = this.queue[i].args;
       const callback = this.queue[i].callback;
@@ -474,6 +666,35 @@ class GingerApp extends gingerDataMixin(LitElement) {
     }
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  /**
+   * Selects a morph for editing.
+   * @param {string} morph
+   */
+  select(morph) {
+    let selectControl;
+    let found = false;
+
+    for (const control in this.controls) {
+      if (this.controls[control].control == morph) {
+        this.selected = morph;
+        selectControl = this.controls[control];
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      return;
+    }
+
+    const min = selectControl.min;
+    const max = selectControl.max;
+    const percent =
+      ((selectControl.morph.value - min) * 100) / (max - min) / 100;
+
+    const slider = this.shadowRoot.getElementById('range');
+    slider.value = percent;
   }
 
   /**
@@ -511,6 +732,56 @@ class GingerApp extends gingerDataMixin(LitElement) {
   }
 
   /**
+   * Updates a morphs current value by name.
+   * @param {string} morph
+   * @param {number} progress
+   */
+  updateMorph(morph, progress) {
+    let selectControl;
+    let found = false;
+
+    morph = typeof morph !== 'undefined' ? morph : this.selected;
+
+    for (const control in this.controls) {
+      if (this.controls[control].control == morph) {
+        selectControl = this.controls[control];
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      return;
+    }
+
+    const min = selectControl.min;
+    const max = selectControl.max;
+    const value = (max - min) * progress + min;
+    selectControl.morph.value = value;
+  }
+
+  /**
+   * Returns a share link to share the currently morphed model.
+   */
+  generateShareLink() {
+    const params = [];
+    const url = `${location.protocol}//${location.host}${location.pathname}`;
+
+    for (const control in this.controls) {
+      const selectControl = this.controls[control];
+      const min = selectControl.min;
+      const max = selectControl.max;
+      const percent =
+        ((selectControl.morph.value - min) * 100) / (max - min) / 100;
+
+      params.push([selectControl.control, percent.toString()]);
+    }
+
+    const paramsString = new URLSearchParams(params).toString();
+
+    return `${url}${paramsString}`;
+  }
+
+  /**
    * Setup the Ginger three.js scene.
    */
   init() {
@@ -539,48 +810,39 @@ class GingerApp extends gingerDataMixin(LitElement) {
       .appendChild(this.renderer.domElement);
 
     // Allow viewport resizing whenever the window resizes.
-    window.onresize = this.onresize;
+    window.addEventListener('resize', this.handleWindowResize.bind(this));
 
     // Setup mouse events so ginger's eyes can track the mouse.
     const renderer = this.shadowRoot.getElementById('renderer');
-    renderer.addEventListener('mousemove', this.onmousemove);
-    renderer.addEventListener('touchmove', this.ontouchmove);
-
-    // Setup events for the slider and selector.
-    this.shadowRoot.getElementById('range').onchange = this.onrangeslide;
-    this.shadowRoot.getElementById('range').oninput = this.onrangeslide;
-    this.shadowRoot.getElementById('morph').onchange = this.onselect;
-    this.shadowRoot.getElementById('share').onclick = this.onsharepress;
-    this.shadowRoot.getElementById('mousetrack').onclick = this.onmousetrack;
-    this.shadowRoot.getElementById(
-      'screenshot'
-    ).onclick = this.onscreenshotpress;
-
-    // Parse the url substring for GET parameters and put them in a dictionary.
-    // var sharedParams = parseShareLink();
+    renderer.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    renderer.addEventListener('touchmove', this.handleTouchMove.bind(this));
 
     // Set the initial values of ginger to the values in the GET params.
-    // for (var control in controls) {
-    //   var selectedControl = controls[control];
-    //   if (sharedParams[selectedControl.control] !== undefined) {
-    //     updateMorph(
-    //       sharedParams[selectedControl.control],
-    //       selectedControl.control
-    //     );
-    //   }
-    // }
+    const shareParams = new URLSearchParams(window.location.search);
+    for (const control in this.controls) {
+      const selectedControl = this.controls[control];
+      if (shareParams.get(selectedControl.control) != null) {
+        this.updateMorph(
+          selectedControl.control,
+          shareParams.get(selectedControl.control)
+        );
+      }
+    }
+
+    // Add everything to the scene.
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(0, 0, 1);
     this.scene.add(directionalLight);
 
     this.scene.add(this.ginger);
+
     this.leftEye.position.set(0.96, 6.169, 1.305);
     this.ginger.add(this.leftEye);
     this.rightEye.position.set(-0.96, 6.169, 1.305);
     this.ginger.add(this.rightEye);
 
-    this.load();
+    this.loadAssets();
     this.select(this.selected);
     this.animate();
   }
