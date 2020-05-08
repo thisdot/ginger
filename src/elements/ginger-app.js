@@ -479,7 +479,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
    */
   handleRangeSlide(event) {
     const progress = event.target.valueAsNumber;
-    this.updateMorph(progress);
+    this.updateMorph(null, progress);
     this.morph();
   }
 
@@ -568,6 +568,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
 
     while (seconds > 0) {
       this.screenshotCounter = seconds;
+      counter.innerHTML = seconds; // FIXME
       await new Promise((resolve) => setTimeout(resolve, 1000));
       seconds -= 1;
     }
@@ -705,7 +706,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
       const morphTarget = this.morphs[item];
 
       if (morphTarget.behavior !== undefined) {
-        morphTarget.behavior(morphTarget.value);
+        morphTarget.behavior.bind(this)(morphTarget.value);
       }
 
       // Find which morph needs to have the value applied to. This is determined
@@ -740,7 +741,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
     let selectControl;
     let found = false;
 
-    morph = typeof morph !== 'undefined' ? morph : this.selected;
+    morph = morph || this.selected;
 
     for (const control in this.controls) {
       if (this.controls[control].control == morph) {
@@ -778,13 +779,13 @@ class GingerApp extends gingerDataMixin(LitElement) {
 
     const paramsString = new URLSearchParams(params).toString();
 
-    return `${url}${paramsString}`;
+    return `${url}?${paramsString}`;
   }
 
   /**
    * Setup the Ginger three.js scene.
    */
-  init() {
+  async init() {
     const overlay = this.shadowRoot.querySelectorAll('.full-shadow');
     for (let i = 0; i < overlay.length; i++) {
       overlay[i].addEventListener('click', function (e) {
@@ -842,9 +843,10 @@ class GingerApp extends gingerDataMixin(LitElement) {
     this.rightEye.position.set(-0.96, 6.169, 1.305);
     this.ginger.add(this.rightEye);
 
-    this.loadAssets();
+    await this.loadAssets();
     this.select(this.selected);
     this.animate();
+    this.morph();
   }
 }
 

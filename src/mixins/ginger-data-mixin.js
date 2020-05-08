@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { LegacyJSONLoader } from '../contrib/LegacyJSONLoader';
 
 /**
  * A mixin that contains helper functions to load 3D assets and weights and
@@ -13,6 +14,9 @@ export const gingerDataMixin = (base) =>
       this.ginger = new THREE.Object3D();
       this.leftEye = new THREE.Object3D();
       this.rightEye = new THREE.Object3D();
+
+      this.leftEyeOrigin = null;
+      this.rightEyeOrigin = null;
 
       this.textures = {
         gingercolor: {
@@ -93,9 +97,6 @@ export const gingerDataMixin = (base) =>
           mesh: this.meshes.gingerhead,
           targets: [0, 1, 7, 8],
           thresholds: [-1, 0, 0, 0.1],
-
-          leftEyeOrigin: null,
-          rightEyeOrigin: null,
 
           // Move the eyes based on the sex of ginger. Man eyes are smaller and
           // are moved backed to fit the appearance.
@@ -336,7 +337,7 @@ export const gingerDataMixin = (base) =>
         }
       }
 
-      await Promise.all(texturesPromise, meshesPromise);
+      await Promise.all([texturesPromise, meshesPromise]);
     }
 
     /**
@@ -346,7 +347,7 @@ export const gingerDataMixin = (base) =>
      * @param {String} mesh
      */
     async loadTexture(textureLoader, path, texture) {
-      const loadedTexture = await new Promise((resolve, reject) => {
+      const loadedTexture = new Promise((resolve, reject) => {
         textureLoader.load(path, (loadedTexture) => {
           resolve(loadedTexture);
         });
@@ -354,6 +355,7 @@ export const gingerDataMixin = (base) =>
         throw err;
       });
       this.textures[texture].texture = loadedTexture;
+      return loadedTexture;
     }
 
     /**
@@ -385,13 +387,14 @@ export const gingerDataMixin = (base) =>
       }).catch((err) => {
         throw err;
       });
+      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(geometry);
 
       let texture, normalmap, color;
       if (this.meshes[mesh].texture !== null) {
-        texture = this.meshes[mesh].texture.texture;
+        texture = await this.meshes[mesh].texture.texture;
       }
       if (this.meshes[mesh].normalmap !== null) {
-        normalmap = this.meshes[mesh].normalmap.texture;
+        normalmap = await this.meshes[mesh].normalmap.texture;
       }
       if (this.meshes[mesh].color !== null) {
         color = this.meshes[mesh].color;
@@ -405,14 +408,16 @@ export const gingerDataMixin = (base) =>
         shading: THREE.SmoothShading,
         morphTargets: this.meshes[mesh].morphTargets,
       });
-      this.meshes[mesh].mesh = new THREE.Mesh(geometry, material);
+      this.meshes[mesh].mesh = new THREE.Mesh(bufferGeometry, material);
     }
 
     /**
      * Loads in all required meshes over the network.
      */
     async loadMeshes() {
-      const jsonLoader = new THREE.LegacyJSONLoader();
+      // FIXME: Replace LegacyJSONLoader with a supported loader once we get the
+      // Ginger assets converted into a more modern format.
+      const jsonLoader = new LegacyJSONLoader();
       const promises = [];
 
       for (let mesh in this.meshes) {
