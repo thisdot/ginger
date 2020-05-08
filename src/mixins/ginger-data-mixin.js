@@ -400,14 +400,21 @@ export const gingerDataMixin = (base) =>
         color = this.meshes[mesh].color;
       }
 
-      const material = new THREE.MeshLambertMaterial({
-        map: texture,
-        color: color,
-        normalmap: normalmap,
+      const materialParams = {
         vertexColors: THREE.FaceColors,
-        shading: THREE.SmoothShading,
+        flatShading: false,
         morphTargets: this.meshes[mesh].morphTargets,
-      });
+      };
+      if (texture) {
+        materialParams.map = texture;
+      }
+      if (normalmap) {
+        materialParams.normalMap = normalmap;
+      }
+      if (color) {
+        materialParams.color = color;
+      }
+      const material = new THREE.MeshStandardMaterial(materialParams);
       this.meshes[mesh].mesh = new THREE.Mesh(bufferGeometry, material);
     }
 
