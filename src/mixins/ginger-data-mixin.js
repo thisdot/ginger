@@ -32,7 +32,7 @@ export const gingerDataMixin = (base) =>
         gingerhead: {
           path: 'static/model/gingerhead.json',
           texture: this.textures.gingercolor,
-          normalmap: this.textures.gingercolornormal,
+          normalmap: null,
           morphTargets: true,
           mesh: null,
         },
