@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import Clipboard from 'clipboard';
 import { LitElement, html, css } from 'lit-element';
 
-import { gingerTheme } from '../styles/theme';
 import { gingerDataMixin } from '../mixins/ginger-data-mixin';
+import { gingerTheme } from '../styles/theme';
 
 /**
  * `ginger-app` top-level element containing the ginger application
@@ -30,6 +31,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
       queue: { type: Array },
       aspect: { type: Number },
       isMouseTracking: { type: Boolean },
+      isTakingScreenshot: { type: Boolean },
       leftEyeOrigin: { type: Object },
       rightEyeOrigin: { type: Object },
       selected: { type: String },
@@ -353,7 +355,11 @@ class GingerApp extends gingerDataMixin(LitElement) {
             title="This Dot Labs"
           ></a>
         </div>
-        <div><a id="hide-header">Hide This Header ❌</a></div>
+        <div>
+          <a id="hide-header" @click="${this.handleHideHeader}"
+            >Hide This Header ❌</a
+          >
+        </div>
         <div>
           <a
             href="https://example.com"
@@ -436,7 +442,13 @@ class GingerApp extends gingerDataMixin(LitElement) {
         <div class="modal">
           <h1>
             Screenshot
-            <button id="copytoclipboard-image" type="button">Download</button>
+            <button
+              id="copytoclipboard-image"
+              type="button"
+              @click="${this.handleDownloadScreenshot}"
+            >
+              Download
+            </button>
           </h1>
           <img id="screenshot-image" />
         </div>
@@ -509,7 +521,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
    * @param {Event} event
    */
   handleScreenshot(event) {
-    const seconds = 5;
+    const seconds = 3;
     this.countdownScreenshot(seconds);
   }
 
@@ -558,23 +570,66 @@ class GingerApp extends gingerDataMixin(LitElement) {
   }
 
   /**
+   * Called after the clipboard library successfully copies the share text.
+   * @param {Event} event
+   */
+  handleCopy(event) {
+    const clipboardButton = this.shadowRoot.getElementById(
+      'copytoclipboard-share'
+    );
+    clipboardButton.textContent = 'Copied!';
+    setTimeout(() => {
+      clipboardButton.textContent = 'Copy to Clipboard';
+    }, 2000);
+  }
+
+  /**
+   * Downloads the screenshot that was taken last.
+   * @param {Event} event
+   */
+  handleDownloadScreenshot(event) {
+    const image = this.shadowRoot.getElementById('screenshot-image').src;
+    const timestamp = Math.floor(Date.now() / 1000);
+    const download = document.createElement('a');
+    download.href = image;
+    download.download = 'ginger-' + timestamp + '.jpg';
+    download.click();
+    download.remove();
+  }
+
+  /**
+   * Removes the site header when the hide link is clicked.
+   * @param {Event} event
+   */
+  handleHideHeader(event) {
+    this.shadowRoot.getElementById('thisdot-lab-header').remove();
+  }
+
+  /**
    * Shows the screenshot counter modal and takes a screenshot after finishing
    * a countdown.
    * @param {number} seconds
    */
   async countdownScreenshot(seconds) {
-    const counter = this.shadowRoot.getElementById('counter');
-    counter.classList.remove('hidden');
+    if (this.isTakingScreenshot) return;
 
-    while (seconds > 0) {
-      this.screenshotCounter = seconds;
-      counter.innerHTML = seconds; // FIXME
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      seconds -= 1;
+    try {
+      this.isTakingScreenshot = true;
+      const counter = this.shadowRoot.getElementById('counter');
+      counter.classList.remove('hidden');
+
+      while (seconds > 0) {
+        this.screenshotCounter = seconds;
+        counter.innerHTML = seconds; // FIXME
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        seconds -= 1;
+      }
+      this.takeScreenshot();
+
+      counter.classList.add('hidden');
+    } finally {
+      this.isTakingScreenshot = false;
     }
-    this.takeScreenshot();
-
-    counter.classList.add('hidden');
   }
 
   /**
@@ -786,6 +841,15 @@ class GingerApp extends gingerDataMixin(LitElement) {
    * Setup the Ginger three.js scene.
    */
   async init() {
+    // Initialize the clipboard library used for the copy button.
+    const clipboardButton = this.shadowRoot.getElementById(
+      'copytoclipboard-share'
+    );
+    const clipboard = new Clipboard(clipboardButton, {
+      target: (trigger) => this.shadowRoot.getElementById('share-link'),
+    });
+    clipboard.on('success', this.handleCopy.bind(this));
+
     const overlay = this.shadowRoot.querySelectorAll('.full-shadow');
     for (let i = 0; i < overlay.length; i++) {
       overlay[i].addEventListener('click', function (e) {
