@@ -3,7 +3,105 @@ import Clipboard from 'clipboard';
 import { LitElement, html, css } from 'lit-element';
 
 import { gingerDataMixin } from '../mixins/ginger-data-mixin';
-import { gingerTheme } from '../styles/theme';
+import { thisDotTheme } from '../styles/theme';
+
+const styles = css`
+  :host {
+    display: block;
+    background-color: var(--grey800);
+    color: var(--grey100);
+    overflow: hidden;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    background-color: var(--grey800);
+  }
+
+  .flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flex-stretch > * {
+    flex: 1 1 0;
+  }
+
+  .button-container > * {
+    padding: 0 24px;
+  }
+
+  .full-shadow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal {
+    position: absolute;
+    z-index: 100;
+    top: 25%;
+    left: 25%;
+    right: 25%;
+    padding: 24px;
+    background-color: var(--grey800);
+  }
+
+  .ginger-header {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: var(--grey800);
+  }
+
+  #screenshot-image {
+    display: block;
+  }
+
+  #counter {
+    position: absolute;
+    top: calc(50% - 50px - 75px);
+    left: calc(50% - 100px);
+    width: 200px;
+    height: 100px;
+    padding: 5px;
+    line-height: 100px;
+    text-align: center;
+    font-size: 64px;
+    border-radius: 25px;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+
+    -webkit-user-select: none; /* Chrome all / Safari all */
+    -moz-user-select: none; /* Firefox all */
+    -ms-user-select: none; /* IE 10+ */
+    user-select: none; /* Likely future */
+  }
+
+  #share-link {
+    width: 100%;
+    height: 50px;
+  }
+
+  #screenshot-modal .modal {
+    bottom: 10%;
+  }
+
+  @media (max-width: 767px) {
+  }
+`;
 
 /**
  * `ginger-app` top-level element containing the ginger application
@@ -40,289 +138,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
   }
 
   static get styles() {
-    const styles = css`
-      #thisdot-lab-header {
-        position: absolute;
-        top: 0;
-        width: 100%;
-        height: 65px;
-        background-color: #fff;
-      }
-      #thisdot-lab-header div {
-        min-width: 300px;
-        text-align: center;
-      }
-
-      #thisdot-logo {
-        width: 100px;
-        height: 62px;
-        background: url(images/thisdot.svg) no-repeat center center;
-        background-size: contain;
-        display: block;
-        margin: auto;
-      }
-
-      #hide-header {
-        color: #2732ff;
-        text-decoration: none;
-        border-bottom: 1px solid #2732ff;
-        font-size: 14px;
-      }
-
-      #screenshot-image {
-        width: 100%;
-        height: calc(100% - 60px);
-      }
-
-      #counter {
-        position: absolute;
-        top: calc(50% - 50px - 75px);
-        left: calc(50% - 100px);
-        width: 200px;
-        height: 100px;
-        padding: 5px;
-        line-height: 100px;
-        text-align: center;
-        font-size: 64px;
-        border-radius: 25px;
-        background: rgba(0, 0, 0, 0.75);
-        color: white;
-
-        -webkit-user-select: none; /* Chrome all / Safari all */
-        -moz-user-select: none; /* Firefox all */
-        -ms-user-select: none; /* IE 10+ */
-        user-select: none; /* Likely future */
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      .panel {
-        position: absolute;
-        width: 100%;
-        height: 145px;
-        bottom: 0;
-        background: rgba(90, 90, 90, 1);
-      }
-
-      label {
-        padding: 10px 0 0 1.2em;
-        display: block;
-        color: #fff;
-      }
-
-      .full-shadow {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0, 0, 0, 0.5);
-      }
-
-      .modal {
-        position: absolute;
-        z-index: 100;
-        top: 25%;
-        left: 25%;
-        right: 25%;
-        padding: 15px;
-        border-radius: 5px;
-        background: rgb(100, 100, 100);
-        color: #fafafa;
-      }
-
-      .modal h1,
-      .modal h2,
-      .modal h3,
-      .modal h4 {
-        margin-top: 0;
-      }
-
-      .clearfix {
-        clear: both;
-      }
-
-      button,
-      .button {
-        padding: 10px;
-        margin: 0 16px;
-        outline: none;
-        border: 1px solid rgb(90, 90, 90);
-        background: #9ed639;
-        color: #000;
-        min-width: 150px;
-        text-decoration: none;
-        border-radius: 3px;
-      }
-
-      .buttoncolor-ON {
-        background: #9ed639;
-      }
-
-      .buttoncolor-OFF {
-        background: #ff6c70;
-      }
-
-      button:active,
-      .button:active {
-        background: rgb(90, 90, 90);
-      }
-
-      button:active:hover,
-      .button:active:hover {
-        background: rgb(80, 80, 80);
-      }
-
-      #range {
-        width: 90%;
-        height: 55px;
-        margin: 0 20px;
-      }
-
-      .range {
-        -webkit-appearance: none;
-        background: transparent;
-      }
-
-      .range::-moz-focus-outer {
-        border: 0;
-      }
-
-      .range::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 24px;
-        width: 24px;
-        border: 1px solid rgb(70, 70, 70);
-        border-radius: 0;
-        background: rgb(120, 120, 120);
-        margin-top: -4px;
-      }
-
-      .range::-moz-range-thumb {
-        height: 24px;
-        width: 24px;
-        border: 1px solid rgb(70, 70, 70);
-        border-radius: 0;
-        background: rgb(120, 120, 120);
-      }
-
-      .range::-ms-thumb {
-        height: 24px;
-        width: 24px;
-        border: 1px solid rgb(70, 70, 70);
-        border-radius: 0;
-        background: rgb(120, 120, 120);
-      }
-
-      .range::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 15px;
-        background: rgb(70, 70, 70);
-      }
-
-      .range::-moz-range-track {
-        width: 100%;
-        height: 15px;
-        background: rgb(70, 70, 70);
-      }
-
-      .range::-ms-track {
-        width: 100%;
-        height: 15px;
-        background: rgb(70, 70, 70);
-      }
-
-      .range:focus {
-        outline: none;
-      }
-
-      .range::-ms-track {
-        width: 100%;
-        cursor: pointer;
-        background: transparent;
-        border-color: transparent;
-        color: transparent;
-      }
-
-      .select {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        width: 90%;
-        height: 35px;
-        margin: 10px 0 20px 20px;
-        outline: none;
-        background: rgb(70, 70, 70);
-        color: #fafafa;
-        border: 1px solid rgb(60, 60, 60);
-      }
-
-      .select::-moz-focus-outer {
-        border: 0;
-      }
-
-      .flex-container {
-        display: -webkit-flex;
-        display: flex;
-        -webkit-flex-direction: row; /* works with row or column */
-        flex-direction: row;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-justify-content: center;
-        justify-content: center;
-      }
-
-      .flex-container section {
-        flex: 1 1 0;
-      }
-
-      textarea {
-        width: 100%;
-        height: 50px;
-      }
-
-      .modal button {
-        margin: 0;
-        vertical-align: text-top;
-      }
-
-      #screenshot-modal .modal {
-        bottom: 10%;
-      }
-
-      @media (max-width: 580px) {
-        .select {
-          margin: 10px;
-        }
-        button {
-          padding: 10px;
-          margin: 0 2px;
-          min-width: initial;
-        }
-        .button {
-          margin: auto;
-        }
-        #thisdot-lab-header div {
-          min-width: 100px;
-          flex: 1 1 0;
-        }
-        .modal {
-          left: 5%;
-          right: 5%;
-        }
-        #screenshot-image {
-          width: auto;
-          margin: auto;
-          display: block;
-        }
-
-        label {
-          text-align: center;
-        }
-      }
-    `;
-    return [gingerTheme, styles];
+    return [thisDotTheme, styles];
   }
 
   /**
@@ -347,39 +163,103 @@ class GingerApp extends gingerDataMixin(LitElement) {
    */
   render() {
     return html`
-      <div id="thisdot-lab-header" class="flex-container">
-        <div>
-          <a
-            href="https://labs.thisdot.co/"
-            id="thisdot-logo"
-            title="This Dot Labs"
-          ></a>
-        </div>
-        <div>
-          <a id="hide-header" @click="${this.handleHideHeader}"
-            >Hide This Header ❌</a
-          >
-        </div>
-        <div>
-          <a
-            href="https://example.com"
-            class="button"
-            title="Learn how we built this"
-            >Learn More &raquo;</a
-          >
-        </div>
+      <div class="ginger-header">
+        <header id="header" class="td-header">
+          <div>
+            <a
+              href="https://labs.thisdot.co/"
+              class="td-logo"
+              title="This Dot Labs"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                id="Layer_1"
+                width="152"
+                height="34"
+                data-name="Layer 1"
+                viewBox="0 0 279.93 34.62"
+              >
+                <defs>
+                  <style>
+                    .cls-1 {
+                      fill: #626d8e;
+                    }
+                    .cls-2 {
+                      fill: #f46663;
+                    }
+                    .cls-3 {
+                      fill: #9faccc;
+                    }
+                  </style>
+                </defs>
+                <title>
+                  thisdot-publication
+                </title>
+                <path
+                  d="M8.94,6.42H0V.59H24.77V6.42H15.83V34.07H8.94Z"
+                  class="cls-1"
+                />
+                <path
+                  d="M40,.59h6.91V15.5h12V.59h6.88V34.07H58.9V21.35h-12V34.07H40Z"
+                  class="cls-1"
+                />
+                <path d="M90.58.59V34.07H83.7V.59Z" class="cls-1" />
+                <path
+                  d="M106.84,25.16h7c.24,2.39,1.91,3.54,4.26,3.54S122,27.31,122,25.16s-1.34-3.4-5.89-5.26c-6.67-2.75-9-5.9-9-10.82,0-5.5,4-9.09,10.47-9.09C123.5,0,128,3.54,128,9.37h-7a3.28,3.28,0,0,0-3.59-3.44c-2.25,0-3.4,1.39-3.4,3.06,0,2,1.39,3.18,6.07,5.19,6.69,2.87,8.84,5.88,8.84,10.57,0,5.9-4.21,9.87-10.95,9.87S107.22,30.52,106.84,25.16Z"
+                  class="cls-1"
+                />
+                <path
+                  d="M162.61,34.07H151.43V.59h11.19c10.85,0,18.17,6.12,18.17,16.74S173.47,34.07,162.61,34.07Zm.05-27.64h-4.35V28.22h4.35c6.27,0,11.14-3.63,11.14-10.85S168.93,6.42,162.66,6.42Z"
+                  class="cls-1"
+                />
+                <path
+                  d="M264.11,6.42h-8.95V.59h24.77V6.42H271V34.07h-6.88Z"
+                  class="cls-1"
+                />
+                <circle cx="218.03" cy="17.03" r="10.41" class="cls-2" />
+                <polygon
+                  points="234.1 0.29 225.53 0.29 238.38 17.03 225.53 33.76 234.1 33.76 246.96 17.03 234.1 0.29"
+                  class="cls-3"
+                />
+                <polygon
+                  points="201.96 0.29 210.53 0.29 197.67 17.03 210.53 33.76 201.96 33.76 189.11 17.03 201.96 0.29"
+                  class="cls-3"
+                />
+              </svg>
+            </a>
+          </div>
+          <div>
+            <a
+              id="hide-header-btn"
+              class="td-button td-button-outline"
+              href="#"
+              @click="${this.handleHideHeader}"
+              >Hide This Header ❌</a
+            >
+          </div>
+          <div>
+            <a
+              href="https://example.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="td-button td-button-outline"
+              title="Learn how we built this"
+              >Learn More &raquo;</a
+            >
+          </div>
+        </header>
       </div>
 
       <div id="renderer"></div>
 
       <div class="panel">
-        <div class="flex-container">
-          <section>
+        <div class="flex-container flex-stretch">
+          <div>
             <!-- Controls for changing the morphs. -->
             <label for="range">Range of Motion</label>
             <input
-              id="range"
-              class="range"
+              id="morph-range"
+              class="td-range"
               type="range"
               min="0"
               max="1"
@@ -388,12 +268,12 @@ class GingerApp extends gingerDataMixin(LitElement) {
               @change="${this.handleRangeSlide}"
               @input="${this.handleRangeSlide}"
             />
-          </section>
-          <section>
+          </div>
+          <div>
             <label for="morph">Morph Target</label>
             <select
               id="morph"
-              class="select"
+              class="td-select"
               @change="${this.handleMorphSelect}"
             >
               <option value="eyes">Eyes</option>
@@ -407,17 +287,23 @@ class GingerApp extends gingerDataMixin(LitElement) {
               <option value="width">Jaw Width</option>
               <option value="tongue">Tongue</option>
             </select>
-          </section>
+          </div>
         </div>
-        <div class="flex-container">
+        <div class="flex-container button-container">
           <div>
-            <button id="share" type="button" @click="${this.handleShare}">
+            <button
+              id="share"
+              class="td-button"
+              type="button"
+              @click="${this.handleShare}"
+            >
               Share Pose
             </button>
           </div>
           <div>
             <button
               id="screenshot"
+              class="td-button"
               type="button"
               @click="${this.handleScreenshot}"
             >
@@ -427,6 +313,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
           <div>
             <button
               id="mousetrack"
+              class="td-button"
               type="button"
               class="buttoncolor-OFF"
               @click="${this.handleMouseTrack}"
@@ -440,16 +327,15 @@ class GingerApp extends gingerDataMixin(LitElement) {
       <div id="screenshot-modal" class="hidden">
         <div class="full-shadow"></div>
         <div class="modal">
-          <h1>
-            Screenshot
-            <button
-              id="copytoclipboard-image"
-              type="button"
-              @click="${this.handleDownloadScreenshot}"
-            >
-              Download
-            </button>
-          </h1>
+          <h1>Screenshot</h1>
+          <button
+            id="copytoclipboard-image"
+            class="td-button"
+            type="button"
+            @click="${this.handleDownloadScreenshot}"
+          >
+            Download
+          </button>
           <img id="screenshot-image" />
         </div>
       </div>
@@ -461,6 +347,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
             Share Link
             <button
               id="copytoclipboard-share"
+              class="td-button"
               data-clipboard-target="#share-link"
               type="button"
             >
@@ -533,9 +420,12 @@ class GingerApp extends gingerDataMixin(LitElement) {
     this.isMouseTracking = !this.isMouseTracking;
 
     const elButton = this.shadowRoot.getElementById('mousetrack');
-    const state = this.isMouseTracking ? 'ON' : 'OFF';
-    elButton.textContent = `Follow ${state}`;
-    elButton.className = `buttoncolor-${state}`;
+    const currentStateLabel = this.isMouseTracking ? 'ON' : 'OFF';
+    const currentState = this.isMouseTracking ? 'active' : 'inactive';
+    const oppositeState = !this.isMouseTracking ? 'active' : 'inactive';
+    elButton.textContent = `Follow ${currentStateLabel}`;
+    elButton.classList.add(`td-button-${currentState}`);
+    elButton.classList.remove(`td-button-${oppositeState}`);
   }
 
   /**
@@ -566,7 +456,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
    */
   handleWindowResize(event) {
     this.recalculateAspect();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.clientWidth, this.clientHeight);
   }
 
   /**
@@ -602,7 +492,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
    * @param {Event} event
    */
   handleHideHeader(event) {
-    this.shadowRoot.getElementById('thisdot-lab-header').remove();
+    this.shadowRoot.getElementById('header').remove();
   }
 
   /**
@@ -654,8 +544,8 @@ class GingerApp extends gingerDataMixin(LitElement) {
 
     if (this.isMouseTracking) {
       const mouse = new THREE.Vector3(
-        (event.touches[0].clientX / window.innerWidth) * 2 - 1,
-        -(event.touches[0].clientY / window.innerHeight) * 2 + 1,
+        (event.touches[0].clientX / this.clientWidth) * 2 - 1,
+        -(event.touches[0].clientY / this.clientHeight) * 2 + 1,
         0.5
       );
       mouse.unproject(this.camera);
@@ -689,7 +579,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
    * projection matrix for the main perspective camera.
    */
   recalculateAspect() {
-    this.aspect = window.innerWidth / window.innerHeight;
+    this.aspect = this.clientWidth / this.clientHeight;
     this.camera.aspect = this.aspect;
     this.camera.updateProjectionMatrix();
   }
@@ -749,7 +639,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
     const percent =
       ((selectControl.morph.value - min) * 100) / (max - min) / 100;
 
-    const slider = this.shadowRoot.getElementById('range');
+    const slider = this.shadowRoot.getElementById('morph-range');
     slider.value = percent;
   }
 
@@ -859,7 +749,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
     }
 
     this.scene = new THREE.Scene();
-    this.aspect = window.innerWidth / window.innerHeight;
+    this.aspect = this.clientWidth / this.clientHeight;
     this.camera = new THREE.PerspectiveCamera(55, this.aspect, 0.1, 1000);
     this.camera.position.y = 5;
     this.camera.position.z = 10;
@@ -869,7 +759,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
       antialias: true,
       preserveDrawingBuffer: true,
     });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.clientWidth, this.clientHeight);
     this.shadowRoot
       .getElementById('renderer')
       .appendChild(this.renderer.domElement);
@@ -879,8 +769,8 @@ class GingerApp extends gingerDataMixin(LitElement) {
 
     // Setup mouse events so ginger's eyes can track the mouse.
     const renderer = this.shadowRoot.getElementById('renderer');
-    renderer.addEventListener('mousemove', this.handleMouseMove.bind(this));
-    renderer.addEventListener('touchmove', this.handleTouchMove.bind(this));
+    this.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    this.addEventListener('touchmove', this.handleTouchMove.bind(this));
 
     // Set the initial values of ginger to the values in the GET params.
     const shareParams = new URLSearchParams(window.location.search);
