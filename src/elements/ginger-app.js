@@ -17,13 +17,30 @@ const styles = css`
     display: none;
   }
 
+  .title {
+    margin-bottom: 24px;
+  }
+
+  .title > * {
+    margin: 0;
+  }
+
   .panel {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 24px;
+    padding: 0 24px;
     background-color: var(--grey800);
+  }
+
+  .panel > * {
+    margin: 24px 0;
+  }
+
+  .panel label {
+    display: block;
+    margin-bottom: 16px;
   }
 
   .flex-container {
@@ -34,6 +51,10 @@ const styles = css`
 
   .flex-stretch > * {
     flex: 1 1 0;
+  }
+
+  .flex-space-between {
+    justify-content: space-between;
   }
 
   .button-container > * {
@@ -52,9 +73,9 @@ const styles = css`
   .modal {
     position: absolute;
     z-index: 100;
-    top: 25%;
-    left: 25%;
-    right: 25%;
+    top: 10%;
+    left: 10%;
+    right: 10%;
     padding: 24px;
     background-color: var(--grey800);
   }
@@ -66,8 +87,23 @@ const styles = css`
     background-color: var(--grey800);
   }
 
+  #screenshot-modal > .modal {
+    display: flex;
+    flex: 1;
+    justify-content: stretch;
+    flex-direction: column;
+    bottom: 10%;
+  }
+
+  #screenshot-image-container {
+    max-height: calc(100% - 48px - 24px); /* HACK */
+  }
+
   #screenshot-image {
     display: block;
+    max-width: 100%;
+    height: 100%;
+    margin: 0 auto;
   }
 
   #counter {
@@ -93,10 +129,6 @@ const styles = css`
   #share-link {
     width: 100%;
     height: 50px;
-  }
-
-  #screenshot-modal .modal {
-    bottom: 10%;
   }
 
   @media (max-width: 767px) {
@@ -327,24 +359,28 @@ class GingerApp extends gingerDataMixin(LitElement) {
       <div id="screenshot-modal" class="hidden">
         <div class="full-shadow"></div>
         <div class="modal">
-          <h1>Screenshot</h1>
-          <button
-            id="copytoclipboard-image"
-            class="td-button"
-            type="button"
-            @click="${this.handleDownloadScreenshot}"
-          >
-            Download
-          </button>
-          <img id="screenshot-image" />
+          <div class="title flex-container flex-space-between">
+            <h1>Screenshot</h1>
+            <button
+              id="copytoclipboard-image"
+              class="td-button"
+              type="button"
+              @click="${this.handleDownloadScreenshot}"
+            >
+              Download
+            </button>
+          </div>
+          <div id="screenshot-image-container">
+            <img id="screenshot-image" />
+          </div>
         </div>
       </div>
 
       <div id="share-modal" class="hidden">
         <div class="full-shadow"></div>
         <div class="modal">
-          <h1>
-            Share Link
+          <div class="title flex-container flex-space-between">
+            <h1>Share Link</h1>
             <button
               id="copytoclipboard-share"
               class="td-button"
@@ -353,7 +389,7 @@ class GingerApp extends gingerDataMixin(LitElement) {
             >
               Copy to Clipboard
             </button>
-          </h1>
+          </div>
           <textarea id="share-link"></textarea>
         </div>
       </div>

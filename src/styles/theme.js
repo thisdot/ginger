@@ -33,7 +33,19 @@ export const thisDotTheme = css`
     padding: 18px 24px;
   }
 
-  .td-logo {
+  .td-select {
+    width: 100%;
+    padding: 12px 44px 12px 16px;
+    background-color: #fff;
+    border: 1px solid #c2cee0;
+    color: #061328;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wLjAwMDE1MzIyMiAyLjU4ODE3TDAgMEw2LjAwMDI1IDUuNDExODRMMTIgMS42MzYyNGUtMDZWMi41ODgxNkw2LjAwMDI1IDhMMC4wMDAxNTMyMjIgMi41ODgxN1oiIGZpbGw9IiNBMkI0Q0YiLz48L3N2Zz4=);
+    background-repeat: no-repeat;
+    background-size: 12px 8px;
+    background-position: right 20px top 50%;
   }
 
   .td-button {
