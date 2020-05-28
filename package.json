@@ -7,6 +7,11 @@
   "author": "Walter Kuppens <walter@thisdot.co>",
   "license": "Apache 2.0",
   "private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -cw",
+    "serve": "cd ./dist/ && http-server"
+  },
   "dependencies": {
     "clipboard": "^2.0.6",
     "lit-element": "^2.3.1",
