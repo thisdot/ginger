@@ -54,6 +54,7 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
       <head>
         <meta charset="utf-8">
         <meta name="description" content="${description}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>${title}</title>
         <style>
           body {
@@ -67,6 +68,12 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
 
           ginger-app {
             height: 100vh;
+          }
+
+          @supports (-webkit-appearance:none) {
+            ginger-app {
+              height: calc(100vh - 56px);
+            }
           }
         </style>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">

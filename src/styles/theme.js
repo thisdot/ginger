@@ -31,11 +31,14 @@ export const thisDotTheme = css`
     margin-right: auto;
     margin-left: auto;
     padding: 18px 24px;
+    box-sizing: border-box;
   }
 
   .td-select {
     width: 100%;
-    padding: 12px 44px 12px 16px;
+    height: 40px;
+    padding: 8px 44px 8px 16px;
+    border-radius: 5px;
     background-color: #fff;
     border: 1px solid #c2cee0;
     color: #061328;
@@ -90,14 +93,41 @@ export const thisDotTheme = css`
   }
 
   .td-range {
+    -webkit-appearance: none;
+    background-color: var(--white);
+    border-radius: 5px;
+    outline: none;
+    width: 100%;
+    height: 20px;
+    margin: 0;
   }
 
-  .td-range::-webkit-slider-thumb,
-  .td-range::-moz-range-thumb,
+  .td-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--blue500);
+    border-radius: 5px;
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
+  }
+
+  .td-range::-moz-range-thumb {
+    appearance: none;
+    background-color: var(--blue500);
+    border-radius: 5px;
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
+  }
+
   .td-range::-ms-thumb {
-    height: 24px;
-    width: 24px;
-    border-radius: 0;
+    appearance: none;
+    background-color: var(--blue500);
+    border-radius: 5px;
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
   }
 
   .td-range::-webkit-slider-runnable-track,

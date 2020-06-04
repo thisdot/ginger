@@ -45,7 +45,7 @@ const styles = css`
 
   .flex-container {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
   }
 
@@ -55,6 +55,18 @@ const styles = css`
 
   .flex-space-between {
     justify-content: space-between;
+  }
+
+  .dual-pane > div {
+    padding: 0 8px;
+  }
+
+  .dual-pane > div:first-child {
+    padding-left: 0;
+  }
+
+  .dual-pane > div:last-child {
+    padding-right: 0;
   }
 
   .button-container > * {
@@ -131,7 +143,86 @@ const styles = css`
     height: 50px;
   }
 
+  #morph-range {
+    width: 100%;
+  }
+
   @media (max-width: 767px) {
+    #screenshot-image-container {
+      max-height: calc(100% - 95px - 24px); /* HACK */
+    }
+
+    .title {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .title > * {
+      flex-basis: 100%;
+    }
+
+    .title h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .panel {
+      max-height: 200px;
+      overflow-y: scroll;
+    }
+
+    .dual-pane {
+      flex-wrap: wrap;
+    }
+
+    .dual-pane > div {
+      flex-basis: 100%;
+      padding: 8px 0;
+    }
+
+    .button-container {
+    }
+
+    .button-container > div {
+      flex-grow: 1;
+      padding: 0 4px;
+    }
+
+    .button-container button {
+      padding: 0;
+      width: 100%;
+      max-width: 230px;
+    }
+
+    .td-header {
+      justify-content: center;
+    }
+
+    .td-header > div {
+      padding: 8px 8px;
+    }
+
+    .td-logo-container {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 450px) {
+    .button-container {
+      flex-wrap: wrap;
+    }
+
+    .button-container > div {
+      flex-grow: 1;
+      flex-basis: 100%;
+      padding: 8px 0;
+    }
+
+    .button-container button {
+      width: 100%;
+      max-width: unset;
+    }
   }
 `;
 
@@ -493,7 +584,7 @@ class GingerApp extends LitElement {
     return html`
       <div class="ginger-header">
         <header id="header" class="td-header">
-          <div>
+          <div class="td-logo-container">
             <a
               href="https://labs.thisdot.co/"
               class="td-logo"
@@ -581,7 +672,7 @@ class GingerApp extends LitElement {
       <div id="renderer"></div>
 
       <div class="panel">
-        <div class="flex-container flex-stretch">
+        <div class="flex-container flex-stretch dual-pane">
           <div>
             <!-- Controls for changing the morphs. -->
             <label for="range">Range of Motion</label>
@@ -825,6 +916,7 @@ class GingerApp extends LitElement {
    */
   handleHideHeader(event) {
     this.shadowRoot.getElementById('header').remove();
+    this.camera.position.y = 4;
   }
 
   /**
@@ -870,10 +962,6 @@ class GingerApp extends LitElement {
    * @param {Event} event
    */
   lookAtCursor(event) {
-    if (event.type == 'touchmove') {
-      event.preventDefault();
-    }
-
     if (this.isMouseTracking) {
       const mouse = new THREE.Vector3(
         (event.touches[0].clientX / this.clientWidth) * 2 - 1,
@@ -1222,7 +1310,7 @@ class GingerApp extends LitElement {
     this.aspect = this.clientWidth / this.clientHeight;
     this.camera = new THREE.PerspectiveCamera(55, this.aspect, 0.1, 1000);
     this.camera.position.y = 5;
-    this.camera.position.z = 10;
+    this.camera.position.z = 14;
 
     // Create a renderer the size of the window and attach it to the DOM.
     this.renderer = new THREE.WebGLRenderer({
