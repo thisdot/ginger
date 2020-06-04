@@ -54,18 +54,29 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
       <head>
         <meta charset="utf-8">
         <meta name="description" content="${description}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>${title}</title>
         <style>
-          html, body {
-            width: 100%;
-            height: 100%;
+          body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            background: black;
-            font-family: Arial;
+            font-family: Montserrat,sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-font-smoothing: antialiased;
+            -o-font-smoothing: antialiased;
+          }
+
+          ginger-app {
+            height: 100vh;
+          }
+
+          @supports (-webkit-appearance:none) {
+            ginger-app {
+              height: calc(100vh - 56px);
+            }
           }
         </style>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
         ${links}
         ${scripts}
       </head>
