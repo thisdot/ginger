@@ -77,8 +77,16 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
           }
         </style>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="/static/images/icon.png" rel="shortcut icon" type="image/x-icon">
         ${links}
         ${scripts}
+        <script>
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/service-worker.js');
+            });
+          }
+        </script>
       </head>
       <body>
         <ginger-app></ginger-app>
@@ -89,46 +97,81 @@ const indexHtmlTemplate = async ({ attributes, files, publicPath, title }) => {
   return indexHtml.replace(/\s+/g, ' ').trim();
 };
 
-export default {
-  input: './index.js',
-  output: {
-    file: './dist/bundle.rollup.js',
-    format: 'iife',
-    name: 'ginger',
-  },
-  plugins: [
-    resolve({
-      browser: true,
-      jsnext: true,
-      extensions: ['.js', '.json'],
-    }),
-    commonjs(),
-    replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
-    babel({
-      extensions: ['.js'],
-      presets: [],
-      // Three.js is ignored as babel takes millennia to process it, probably
-      // being caused by a bug.
-      ignore: ['node_modules/three'],
-      env: {
-        production: {
-          presets: ['@babel/preset-env', 'minify'],
+export default [
+  {
+    input: './index.js',
+    output: {
+      file: './dist/bundle.rollup.js',
+      format: 'iife',
+      name: 'ginger',
+    },
+    plugins: [
+      resolve({
+        browser: true,
+        jsnext: true,
+        extensions: ['.js', '.json'],
+      }),
+      commonjs(),
+      replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
+      babel({
+        extensions: ['.js'],
+        presets: [],
+        // Three.js is ignored as babel takes millennia to process it, probably
+        // being caused by a bug.
+        ignore: ['node_modules/three'],
+        env: {
+          production: {
+            presets: ['@babel/preset-env', 'minify'],
+          },
         },
-      },
-    }),
-    cleanup({ comments: 'none' }),
-    html({
-      title: 'Ginger',
-      publicPath: '/',
-      attributes: {
-        html: { lang: 'en' },
-        link: null,
-        script: { type: 'module' },
-      },
-      template: indexHtmlTemplate,
-    }),
-    copy({
-      targets: [{ src: 'static', dest: 'dist' }],
-    }),
-  ],
-};
+      }),
+      cleanup({ comments: 'none' }),
+      html({
+        title: 'Ginger',
+        publicPath: '/',
+        attributes: {
+          html: { lang: 'en' },
+          link: null,
+          script: { type: 'module' },
+        },
+        template: indexHtmlTemplate,
+      }),
+      copy({
+        targets: [
+          { src: 'static', dest: 'dist' },
+          // { src: 'service-worker.js', dest: 'dist' },
+        ],
+      }),
+    ],
+  },
+  {
+    input: './service-worker.js',
+    output: {
+      file: './dist/service-worker.js',
+      format: 'iife',
+      name: 'sw',
+    },
+    plugins: [
+      resolve({
+        browser: true,
+        jsnext: true,
+        extensions: ['.js', '.json'],
+      }),
+      commonjs(),
+      replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
+      babel({
+        extensions: ['.js'],
+        presets: [],
+        // Three.js is ignored as babel takes millennia to process it, probably
+        // being caused by a bug.
+        ignore: ['node_modules/three'],
+        env: {
+          production: {
+            presets: ['@babel/preset-env', 'minify'],
+          },
+        },
+      }),
+      cleanup({ comments: 'none' }),
+    ],
+  },
+];
