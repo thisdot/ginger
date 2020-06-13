@@ -139,7 +139,7 @@ export default [
       copy({
         targets: [
           { src: 'static', dest: 'dist' },
-          // { src: 'service-worker.js', dest: 'dist' },
+          { src: 'manifest.json', dest: 'dist' },
         ],
       }),
     ],

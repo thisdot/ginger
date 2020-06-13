@@ -5,6 +5,9 @@ import { LitElement, html, css } from 'lit-element';
 
 import { thisDotTheme } from '../styles/theme';
 
+const blogPostLink =
+  'https://labs.thisdot.co/blog/webgl-morph-targets-and-ginger-modernizing-for-todays-web';
+
 const styles = css`
   :host {
     display: block;
@@ -658,7 +661,7 @@ class GingerApp extends LitElement {
           </div>
           <div>
             <a
-              href="https://example.com"
+              href="${blogPostLink}"
               target="_blank"
               rel="noopener noreferrer"
               class="td-button td-button-outline"
